@@ -1,0 +1,129 @@
+
+<ion-app>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="brand" (click)="go('home')" aria-label="RoadReady home">
+        <span class="brand-mark">r</span><span>roadready</span>
+      </button>
+      <div class="top-actions">
+        <span class="demo-pill"><span class="pulse"></span> DEMO MODE</span>
+        <button class="avatar" aria-label="Customer profile">JM</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <section *ngIf="stage === 'home'" class="page">
+        <div class="eyebrow">TUESDAY, 27 OCTOBER</div>
+        <h1>Let's get you<br><span>back on the road.</span></h1>
+        <p class="muted intro">Roadside help is just a few taps away.</p>
+
+        <div class="vehicle-card">
+
+          <div class="vehicle-top"><span class="small-label">YOUR VEHICLE</span><span class="vehicle-status"><i></i> Needs assistance</span></div>
+          <div class="car-emoji">🚙</div>
+          <h2>{{ customer.vehicle }}</h2>
+          <div class="plate">{{ customer.registration }}</div>
+          <div class="vehicle-footer"><span>Silver · Personal vehicle</span><span class="arrow">↗</span></div>
+        </div>
+
+        <button class="primary-btn large" (click)="go('dealer')"><span class="button-icon">⌁</span> Get roadside assistance <span class="btn-arrow">→</span></button>
+        <div class="section-heading"><h2>What happened?</h2><span class="muted small">Choose your next step</span></div>
+        <button class="service-row" (click)="go('dealer')"><span class="service-icon lime">⚒</span><span class="service-copy"><b>My car has broken down</b><small>Find a nearby garage and recovery</small></span><span class="chevron">›</span></button>
+        <button class="service-row" (click)="go('dealer')"><span class="service-icon gray">↗</span><span class="service-copy"><b>I need a tow</b><small>Move your vehicle to safety</small></span><span class="chevron">›</span></button>
+        <div class="section-heading"><h2>Recent activity</h2><span class="muted small">Demo booking</span></div>
+        <div class="mini-booking" *ngIf="bookingConfirmed; else noBooking" (click)="go('tracking')">
+          <span class="activity-icon">🚚</span><span class="service-copy"><b>Roadside repair · KDA 245X</b><small>{{ currentStatus }}</small></span><span class="chevron">›</span>
+        </div>
+        <ng-template #noBooking><div class="empty-card"><span>◷</span><div><b>No active bookings</b><p>Your demo journey will appear here.</p></div></div></ng-template>
+      </section>
+
+      <section *ngIf="stage === 'dealer'" class="page">
+        <button class="back-link" (click)="go('home')">← Back</button>
+        <div class="eyebrow">STEP 1 OF 3</div><h1>Find your <span>mechanic.</span></h1>
+        <p class="muted intro">Choose a nearby garage for your Toyota Fielder.</p>
+        <div class="map-wrap dealer-map-wrap"><div id="dealer-map" class="map"></div><div class="map-tag"><span class="pulse"></span> Waiyaki Way, Nairobi</div></div>
+        <div class="map-legend"><span><i class="dot lime-dot"></i> Your vehicle</span><span><i class="dot dark-dot"></i> Service providers</span><span class="map-note">Illustrative locations</span></div>
+        <div class="section-heading"><h2>Nearby providers</h2><span class="muted small">3 places</span></div>
+        <article class="dealer-card" *ngFor="let p of providers; let i = index" [class.selected]="i === 0 && dealerSelected">
+          <div class="dealer-icon">{{ i === 0 ? '🔧' : i === 1 ? '🚚' : '🛠' }}</div>
+          <div class="dealer-info"><div class="dealer-title">{{ p.name }} <span *ngIf="i===0" class="recommended">RECOMMENDED</span></div><p>{{ p.kind }}</p><div class="dealer-meta"><b>★ {{ p.rating }}</b><span>·</span><span>{{ p.distance }}</span><span>·</span><span>{{ p.response }} away</span></div></div>
+          <button class="select-btn" (click)="selectDealer()">{{ dealerSelected && i===0 ? 'Selected ✓' : 'Choose' }}</button>
+        </article>
+        <div class="notice">ⓘ These are fictional providers and map locations for this demonstration.</div>
+      </section>
+
+      <section *ngIf="stage === 'issue'" class="page">
+        <button class="back-link" (click)="go('dealer')">← Back to providers</button>
+        <div class="eyebrow">STEP 2 OF 3</div><h1>Tell us what's <span>wrong.</span></h1><p class="muted intro">A few details help the garage prepare.</p>
+        <div class="selected-provider"><span class="service-icon lime">⚒</span><div><b>{{ dealer.name }}</b><small>Selected garage · ★ {{ dealer.rating }}</small></div><button (click)="go('dealer')">Change</button></div>
+        <label class="field-label">WHAT'S THE ISSUE?</label>
+        <div class="choice-grid"><button *ngFor="let type of ['Tyre puncture','Engine trouble','Battery failure','Other']" [class.chosen]="problemType===type" (click)="problemType=type">{{ type }}</button></div>
+        <label class="field-label" for="issue">DESCRIBE THE PROBLEM</label>
+        <textarea id="issue" [(ngModel)]="issue" rows="5" placeholder="Tell us what happened..."></textarea>
+        <div class="field-hint">Be as specific as possible so the mechanic knows what to expect.</div>
+        <div class="question-card"><div><b>Can the car be driven?</b><small>For safety, we'll arrange recovery if needed.</small></div><div class="answer-tag">No</div></div>
+        <div class="question-card"><div><b>Are you in a safe place?</b><small>Your location is simulated for this demo.</small></div><div class="answer-tag">Yes</div></div>
+        <button class="primary-btn large full" (click)="go('schedule')">Continue to pickup <span class="btn-arrow">→</span></button>
+      </section>
+
+      <section *ngIf="stage === 'schedule'" class="page">
+        <button class="back-link" (click)="go('issue')">← Back</button><div class="eyebrow">FINAL STEP</div><h1>Arrange your <span>pickup.</span></h1><p class="muted intro">We'll simulate the recovery from pickup to garage.</p>
+        <div class="route-summary"><div class="route-point"><span class="route-dot lime-dot"></span><div><small>PICKUP LOCATION</small><b>Waiyaki Way, Nairobi</b><p>Your car's simulated location</p></div></div><div class="route-dash"></div><div class="route-point"><span class="route-dot dark-dot"></span><div><small>DESTINATION GARAGE</small><b>{{ dealer.name }}</b><p>{{ dealer.address }}</p></div></div></div>
+        <label class="field-label" for="date">PICKUP DATE</label><input id="date" class="text-input" type="date" [(ngModel)]="pickupDate">
+        <label class="field-label">PREFERRED TIME</label><div class="choice-grid time-grid"><button *ngFor="let t of ['As soon as possible','Within 1 hour','Choose a time']" [class.chosen]="pickupTime===t" (click)="pickupTime=t">{{ t }}</button></div>
+        <label class="field-label" for="notes">NOTE FOR THE DRIVER (OPTIONAL)</label><textarea id="notes" [(ngModel)]="notes" rows="2" placeholder="Any helpful details..."></textarea>
+        <div class="cost-card"><div class="cost-head"><b>Estimated cost</b><span>Illustrative prices</span></div><div class="cost-line"><span>Dispatch fee</span><b>KES 500</b></div><div class="cost-line"><span>Recovery / towing</span><b>KES 2,000</b></div><div class="cost-line"><span>Inspection</span><b>KES 800</b></div><div class="cost-total"><span>Estimated total</span><b>KES {{ totalEstimate.toLocaleString() }}</b></div></div>
+        <button class="primary-btn large full" (click)="confirmBooking()">Confirm demo appointment <span class="btn-arrow">→</span></button>
+        <p class="center muted tiny">No real provider is contacted and no payment is taken.</p>
+      </section>
+
+      <section *ngIf="stage === 'tracking'" class="page">
+        <button class="back-link" (click)="go('home')">← Dashboard</button>
+        <div class="eyebrow">BOOKING RR-28491 <span class="live-label"><i></i> LIVE DEMO</span></div>
+        <h1>Your help is <span>on the way.</span></h1><p class="muted intro">{{ trackingDescription }}</p>
+        <div class="tracking-hero"><div class="hero-top"><span class="status-pill">{{ currentStatus }}</span><span class="live-dot"></span></div><div class="route-title"><div><small>RECOVERY ROUTE</small><b>Waiyaki Way <span>→</span> Westlands</b></div><span class="route-icon">↗</span></div><div class="progress-track"><div class="progress-fill" [style.width.%]="routeProgress*100"></div></div><div class="progress-meta"><span>{{ routeProgress < 0.5 ? 'Heading to pickup' : routeProgress < 1 ? 'Transporting your car' : 'Arrived at garage' }}</span><b>{{ (routeProgress*100) | number:'1.0-0' }}%</b></div><div class="hero-bottom"><span><small>ESTIMATED ARRIVAL</small><b>{{ estimatedArrival }}</b></span><span><small>DISTANCE REMAINING</small><b>{{ remainingDistance }}</b></span></div></div>
+        <div class="map-wrap tracking-map-wrap"><div id="tracking-map" class="map"></div><div class="map-float"><span class="float-truck">🚚</span><div><b>Recovery vehicle</b><small>David Kamau · Demo driver</small></div><span class="online-dot"></span></div><div class="map-caption">Simulated route · OpenStreetMap</div></div>
+        <div class="section-heading"><h2>Booking timeline</h2><span class="muted small">{{ min(statusIndex+1, statuses.length) }} of {{ statuses.length }}</span></div>
+        <div class="timeline"><div class="timeline-row" *ngFor="let s of statuses; let i=index" [class.done]="i < statusIndex" [class.active]="i === statusIndex"><span class="timeline-node">{{ i < statusIndex ? '✓' : i === statusIndex ? '•' : '' }}</span><div><b>{{ s }}</b><small>{{ i === statusIndex ? 'Current status' : i < statusIndex ? 'Completed in demo' : 'Upcoming' }}</small></div><span *ngIf="i===statusIndex" class="now-tag">NOW</span></div></div>
+        <div class="driver-card"><div class="driver-avatar">DK</div><div class="driver-copy"><b>David Kamau</b><small>Recovery driver · Demo profile</small><span>🚚 Isuzu recovery truck · KDA 482R</span></div><button class="call-button" (click)="showToast('Calling is disabled in demo mode')">⌕</button></div>
+        <button class="primary-btn large full" (click)="advanceDemo()">Advance demo scenario <span class="btn-arrow">→</span></button>
+        <p class="center muted tiny">The recovery vehicle moves automatically. Use the button to present later stages.</p>
+        <button class="text-btn full" (click)="resetDemo()">Reset this demo</button>
+      </section>
+
+      <section *ngIf="stage === 'quote'" class="page">
+        <button class="back-link" (click)="go('tracking')">← Tracking</button><div class="eyebrow">INSPECTION REPORT · RR-28491</div><h1>Your quote is <span>ready.</span></h1><p class="muted intro">The garage has inspected your vehicle and prepared a repair estimate.</p>
+        <div class="inspection-card"><span class="inspection-icon">✓</span><div><b>Inspection complete</b><p>Front-right tyre puncture located. The tyre is suitable for repair.</p></div></div>
+        <div class="cost-card quote-card"><div class="cost-head"><b>Repair quotation</b><span class="status-pill light">AWAITING APPROVAL</span></div><p class="muted small">{{ dealer.name }} · Valid for this demo</p><div class="cost-line"><span>Tyre puncture repair</span><b>KES 1,500</b></div><div class="cost-line"><span>Labour</span><b>KES 500</b></div><div class="cost-line"><span>Tax (illustrative)</span><b>KES 0</b></div><div class="cost-total"><span>Total repair cost</span><b>KES 2,000</b></div></div>
+        <div class="notice">This is a fictional quotation for presentation purposes, not a real offer.</div>
+        <button class="primary-btn large full" (click)="approveQuote()">Approve repair · KES 2,000 <span class="btn-arrow">→</span></button><button class="secondary-btn full" (click)="showToast('Change request saved in this demo')">Request changes</button><button class="text-btn full" (click)="go('tracking')">Review tracking</button>
+      </section>
+
+      <section *ngIf="stage === 'repair'" class="page">
+        <button class="back-link" (click)="go('tracking')">← Tracking</button><div class="eyebrow">REPAIR IN PROGRESS · RR-28491</div><h1>Getting you <span>road-ready.</span></h1><p class="muted intro">Your repair is approved. Follow each step below.</p>
+        <div class="tracking-hero repair-hero"><div class="hero-top"><span class="status-pill">REPAIR IN PROGRESS</span><span>🔧</span></div><h2>{{ dealer.name }}</h2><p>Front-right tyre puncture repair</p><div class="progress-track"><div class="progress-fill" [style.width.%]="statusIndex >= 11 ? 100 : statusIndex >= 10 ? 85 : statusIndex >= 9 ? 60 : 25"></div></div><div class="progress-meta"><span>Repair checklist</span><b>{{ statusIndex >= 11 ? '100' : statusIndex >= 10 ? '85' : statusIndex >= 9 ? '60' : '25' }}%</b></div></div>
+        <div class="section-heading"><h2>Work checklist</h2><span class="muted small">5 steps</span></div>
+        <div class="task-list"><div class="task-row" *ngFor="let task of repairTasks; let i=index"><span class="task-check" [class.checked]="i < (statusIndex-7)">{{ i < (statusIndex-7) ? '✓' : '' }}</span><span>{{ task.label }}</span></div></div>
+        <div class="cost-card"><div class="cost-line"><span>Approved repair amount</span><b>KES 2,000</b></div><div class="cost-line"><span>Recovery & inspection estimate</span><b>KES 3,300</b></div><div class="cost-total"><span>Estimated total</span><b>KES 5,300</b></div></div>
+        <button class="primary-btn large full" (click)="advanceRepair()">Advance repair progress <span class="btn-arrow">→</span></button>
+        <button class="text-btn full" (click)="go('tracking')">View vehicle tracking</button>
+      </section>
+
+      <section *ngIf="stage === 'complete'" class="page completion-page">
+        <div class="completion-symbol">✓</div><div class="eyebrow center">DEMO BOOKING RR-28491</div><h1 class="center">You're back <span>on the road.</span></h1><p class="muted center intro">Your Toyota Fielder has been repaired and passed its final quality check.</p>
+        <div class="complete-status"><span class="complete-check">✓</span><div><b>Repair completed</b><small>{{ dealer.name }} · Just now in demo</small></div><span class="status-pill light">COMPLETE</span></div>
+        <div class="cost-card"><div class="cost-head"><b>Final demo invoice</b><span>INV-28491</span></div><div class="cost-line"><span>Recovery / towing</span><b>KES 2,000</b></div><div class="cost-line"><span>Dispatch fee</span><b>KES 500</b></div><div class="cost-line"><span>Inspection</span><b>KES 800</b></div><div class="cost-line"><span>Tyre puncture repair</span><b>KES 1,500</b></div><div class="cost-line"><span>Labour</span><b>KES 500</b></div><div class="cost-total"><span>Total</span><b>KES 5,300</b></div></div>
+        <div class="rating-card"><b>How was your experience?</b><p class="muted small">Rate this fictional service provider.</p><div class="stars"><button *ngFor="let star of [1,2,3,4,5]" (click)="showToast('Thanks for your '+star+' star demo rating!')">★</button></div></div>
+        <button class="primary-btn large full" (click)="showToast('Invoice is ready to print'); windowPrint()">Print demo invoice <span class="btn-arrow">↗</span></button><button class="secondary-btn full" (click)="go('home')">Return to dashboard</button><button class="text-btn full" (click)="resetDemo()">Reset and replay scenario</button>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" *ngIf="stage !== 'issue' && stage !== 'schedule'">
+      <button [class.active]="stage==='home'" (click)="go('home')"><span>⌂</span><small>Home</small></button>
+      <button [class.active]="stage==='dealer'" (click)="go('dealer')"><span>◇</span><small>Find help</small></button>
+      <button [class.active]="stage==='tracking'||stage==='quote'||stage==='repair'||stage==='complete'" (click)="go(bookingConfirmed ? 'tracking' : 'home')"><span>◎</span><small>Tracking</small></button>
+      <button (click)="showToast('Settings are not part of this demo')"><span>⚙</span><small>Settings</small></button>
+    </nav>
+    <div class="toast" *ngIf="toast">{{ toast }}</div>
+  </div>
+</ion-app>

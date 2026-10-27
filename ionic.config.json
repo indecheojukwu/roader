@@ -1,0 +1,7 @@
+{
+  "name": "roadready",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
